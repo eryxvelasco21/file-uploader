@@ -38,16 +38,16 @@
   <div id="status"></div>
 
   <script>
-    // ✅ Your deployed Google Apps Script Web App URL
-    const scriptURL = "https://script.google.com/macros/s/AKfycbyOz2_PfsJX3wNi-PMcHiiGSDpx1Xg3UAEzflbEINtvUTq1JZaPoCsizzgKT659CifY/exec";
+    // ✅ Use your real Google Apps Script Web App URL (with /exec at the end)
+    const scriptURL = 'https://script.google.com/macros/s/AKfycbyOz2_PfsJX3wNi-PMcHiiGSDpx1Xg3UAEzflbEINtvUTq1JZaPoCsizzgKT659CifY/exec';
 
-    document.getElementById("uploadForm").addEventListener("submit", function(e) {
+    document.getElementById('uploadForm').addEventListener('submit', function(e) {
       e.preventDefault();
 
-      const fileInput = document.getElementById("fileInput");
-      const description = document.getElementById("description").value;
+      const fileInput = document.getElementById('fileInput');
+      const description = document.getElementById('description').value;
       const file = fileInput.files[0];
-      const statusDiv = document.getElementById("status");
+      const statusDiv = document.getElementById('status');
 
       if (!file) {
         statusDiv.textContent = "Please select a file.";
@@ -56,7 +56,7 @@
 
       const reader = new FileReader();
       reader.onload = async function(event) {
-        const base64Data = event.target.result.split(",")[1];
+        const base64Data = event.target.result.split(',')[1];
 
         const payload = {
           fileName: file.name,
@@ -69,9 +69,8 @@
 
         try {
           const response = await fetch(scriptURL, {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify(payload)
+            method: 'POST',
+            body: JSON.stringify(payload) // ⚡ no headers, avoids CORS issues
           });
 
           const result = await response.json();
@@ -92,3 +91,5 @@
 
 </body>
 </html>
+
+
