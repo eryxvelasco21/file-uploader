@@ -38,7 +38,7 @@
   <div id="status"></div>
 
   <script>
-    // TODO: Replace with your Google Apps Script Web App URL (must include /exec at the end)
+    // ✅ Use your real Google Apps Script Web App URL (with /exec at the end)
     const scriptURL = 'https://script.google.com/macros/s/AKfycbySdsLgNOA5SuWhPHYMT61c8dIbWPGT1UioDGk_RNRo8w_QtqV-VpOU6cSwjumbfB8H/exec';
 
     document.getElementById('uploadForm').addEventListener('submit', function(e) {
@@ -70,18 +70,16 @@
         try {
           const response = await fetch(scriptURL, {
             method: 'POST',
-            body: JSON.stringify(payload),
-            headers: { 'Content-Type': 'application/json' }
+            body: JSON.stringify(payload) // ⚡ no headers, avoids CORS issues
           });
 
           const result = await response.json();
 
           if (result.success) {
-            statusDiv.innerHTML = `✅ File uploaded successfully! <a href="${result.fileUrl}" target="_blank">View File</a>`;
+            statusDiv.innerHTML = `✅ File uploaded! <a href="${result.fileUrl}" target="_blank">View File</a>`;
           } else {
             statusDiv.innerHTML = `❌ Upload failed: ${result.error}`;
           }
-
         } catch (err) {
           statusDiv.innerHTML = `❌ Error: ${err.message}`;
         }
@@ -92,6 +90,4 @@
   </script>
 
 </body>
-
 </html>
-
