@@ -1,95 +1,53 @@
-<!DOCTYPE html>
-<html>
-<head>
-  <title>File Uploader</title>
-  <style>
-    body {
-      font-family: Arial, sans-serif;
-      max-width: 500px;
-      margin: 50px auto;
-      padding: 20px;
-      border: 1px solid #ccc;
-      border-radius: 10px;
+<script>
+  const scriptURL = 'https://script.google.com/macros/s/AKfycbzv9CrB4LdlZefX3t4z2uhbyltorMsC-8aCDy7SxjaDUrMeSkmBX0Vu-yjePDBto2Nu/exec';
+
+  document.getElementById('uploadForm').addEventListener('submit', function(e) {
+    e.preventDefault();
+
+    const fileInput = document.getElementById('fileInput');
+    const description = document.getElementById('description').value;
+    const file = fileInput.files[0];
+    const statusDiv = document.getElementById('status');
+
+    if (!file) {
+      statusDiv.textContent = "Please select a file.";
+      return;
     }
-    input, button {
-      width: 100%;
-      padding: 10px;
-      margin-top: 10px;
-    }
-    #status {
-      margin-top: 20px;
-    }
-  </style>
-</head>
-<body>
 
-  <h2>File Uploader</h2>
+    const reader = new FileReader();
+    reader.onload = async function(event) {
+      const base64Data = event.target.result.split(',')[1];
 
-  <form id="uploadForm">
-    <label for="fileInput">Select file:</label>
-    <input type="file" id="fileInput" required>
-
-    <label for="description">Description:</label>
-    <input type="text" id="description" placeholder="Enter description" required>
-
-    <button type="submit">Submit</button>
-  </form>
-
-  <div id="status"></div>
-
-  <script>
-    // ✅ Use your real Google Apps Script Web App URL (with /exec at the end)
-    const scriptURL = 'https://script.google.com/macros/s/AKfycbxbxhnXu64mRjkh419I1ChOOAgvzD1ALP4hPUJ1qXXHXVWNGVFvG93OPFpF0BP_c4i4/exec';
-
-    document.getElementById('uploadForm').addEventListener('submit', function(e) {
-      e.preventDefault();
-
-      const fileInput = document.getElementById('fileInput');
-      const description = document.getElementById('description').value;
-      const file = fileInput.files[0];
-      const statusDiv = document.getElementById('status');
-
-      if (!file) {
-        statusDiv.textContent = "Please select a file.";
-        return;
-      }
-
-      const reader = new FileReader();
-      reader.onload = async function(event) {
-        const base64Data = event.target.result.split(',')[1];
-
-        const payload = {
-          fileName: file.name,
-          mimeType: file.type,
-          fileData: base64Data,
-          description: description
-        };
-
-        statusDiv.innerHTML = "Uploading...";
-
-        try {
-          const response = await fetch(scriptURL, {
-            method: 'POST',
-            body: JSON.stringify(payload) // ⚡ no headers, avoids CORS issues
-          });
-
-          const result = await response.json();
-
-          if (result.success) {
-            statusDiv.innerHTML = `✅ File uploaded! <a href="${result.fileUrl}" target="_blank">View File</a>`;
-          } else {
-            statusDiv.innerHTML = `❌ Upload failed: ${result.error}`;
-          }
-        } catch (err) {
-          statusDiv.innerHTML = `❌ Error: ${err.message}`;
-        }
+      const payload = {
+        fileName: file.name,
+        mimeType: file.type,
+        fileData: base64Data,
+        description: description
       };
 
-      reader.readAsDataURL(file);
-    });
-  </script>
+      statusDiv.innerHTML = "Uploading...";
 
-</body>
-</html>
+      try {
+        // ⚡ no headers → no preflight → no CORS error
+        const response = await fetch(scriptURL, {
+          method: "POST",
+          body: JSON.stringify(payload)
+        });
 
+        const text = await response.text(); // GAS sometimes returns as text
+        let result;
+        try { result = JSON.parse(text); } catch { result = { success:false, error:text }; }
 
+        if (result.success) {
+          statusDiv.innerHTML = `✅ File uploaded! <a href="${result.fileUrl}" target="_blank">View File</a>`;
+        } else {
+          statusDiv.innerHTML = `❌ Upload failed: ${result.error}`;
+        }
+      } catch (err) {
+        statusDiv.innerHTML = `❌ Error: ${err.message}`;
+      }
+    };
+
+    reader.readAsDataURL(file);
+  });
+</script>
