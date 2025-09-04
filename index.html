@@ -37,63 +37,59 @@
 
   <div id="status"></div>
 
-<script>
-  const scriptURL = 'https://script.google.com/macros/s/AKfycbyD-Mk2ozh05yNUnaevexVSt2yNb_Q6ZVm4qNjsEJ_8OEDnn9z2lcuJf14LTIO4R__T/exec';
+  <script>
+    // ✅ Use your real Google Apps Script Web App URL (with /exec at the end)
+    const scriptURL = 'https://script.google.com/macros/s/AKfycbxmyPODJQICz5zylfoWVQPXjNieb2hNWn-xykFz4ZA310Gb_lWIcueHO3p_YUpwMtI9/exec';
 
-  document.getElementById('uploadForm').addEventListener('submit', function(e) {
-    e.preventDefault();
+    document.getElementById('uploadForm').addEventListener('submit', function(e) {
+      e.preventDefault();
 
-    const fileInput = document.getElementById('fileInput');
-    const description = document.getElementById('description').value;
-    const file = fileInput.files[0];
-    const statusDiv = document.getElementById('status');
+      const fileInput = document.getElementById('fileInput');
+      const description = document.getElementById('description').value;
+      const file = fileInput.files[0];
+      const statusDiv = document.getElementById('status');
 
-    if (!file) {
-      statusDiv.textContent = "Please select a file.";
-      return;
-    }
+      if (!file) {
+        statusDiv.textContent = "Please select a file.";
+        return;
+      }
 
-    const reader = new FileReader();
-    reader.onload = async function(event) {
-      const base64Data = event.target.result.split(',')[1];
+      const reader = new FileReader();
+      reader.onload = async function(event) {
+        const base64Data = event.target.result.split(',')[1];
 
-      const payload = {
-        fileName: file.name,
-        mimeType: file.type,
-        fileData: base64Data,
-        description: description
+        const payload = {
+          fileName: file.name,
+          mimeType: file.type,
+          fileData: base64Data,
+          description: description
+        };
+
+        statusDiv.innerHTML = "Uploading...";
+
+        try {
+          const response = await fetch(scriptURL, {
+            method: 'POST',
+            body: JSON.stringify(payload) // ⚡ no headers, avoids CORS issues
+          });
+
+          const result = await response.json();
+
+          if (result.success) {
+            statusDiv.innerHTML = `✅ File uploaded! <a href="${result.fileUrl}" target="_blank">View File</a>`;
+          } else {
+            statusDiv.innerHTML = `❌ Upload failed: ${result.error}`;
+          }
+        } catch (err) {
+          statusDiv.innerHTML = `❌ Error: ${err.message}`;
+        }
       };
 
-      statusDiv.innerHTML = "Uploading...";
-
-      try {
-        // 🔥 This is where you put it cuh
-        const response = await fetch(scriptURL, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(payload)
-        });
-
-        const result = await response.json();
-
-        if (result.success) {
-          statusDiv.innerHTML = `✅ File uploaded! <a href="${result.fileUrl}" target="_blank">View File</a>`;
-        } else {
-          statusDiv.innerHTML = `❌ Upload failed: ${result.error}`;
-        }
-
-      } catch (err) {
-        statusDiv.innerHTML = `❌ Error: ${err.message}`;
-      }
-    };
-
-    reader.readAsDataURL(file);
-  });
-</script>
+      reader.readAsDataURL(file);
+    });
+  </script>
 
 </body>
 </html>
-
-
 
 
